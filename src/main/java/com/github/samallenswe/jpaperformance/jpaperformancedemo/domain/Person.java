@@ -12,6 +12,7 @@ import javax.persistence.Table;
 public class Person {
   @Id
   @GeneratedValue(strategy= GenerationType.SEQUENCE)
+  @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
   @Column(name="FIRST_NAME")
@@ -33,7 +34,7 @@ public class Person {
   public Person() {
   }
 
-  public void setId(final Long id) {
+  public void setId(final long id) {
     this.id = id;
   }
 
