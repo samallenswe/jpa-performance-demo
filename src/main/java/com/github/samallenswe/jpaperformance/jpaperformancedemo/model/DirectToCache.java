@@ -19,8 +19,8 @@ public class DirectToCache implements CommandLineRunner {
 
   @Override
   public void run(String... args) throws Exception {
-    //persistenceService.writeToH2DB();
-    //persistenceService.readFromH2DB();
+    persistenceService.writeToH2DB();
+    persistenceService.readFromH2DB();
   }
 
   public DirectToCache(@NonNull final PersistenceService persistenceService) {
