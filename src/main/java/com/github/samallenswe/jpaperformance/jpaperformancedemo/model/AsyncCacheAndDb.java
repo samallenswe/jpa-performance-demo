@@ -3,8 +3,6 @@ package com.github.samallenswe.jpaperformance.jpaperformancedemo.model;
 import static com.github.samallenswe.jpaperformance.jpaperformancedemo.utils.Utils.TEST_SIZE;
 
 import com.github.samallenswe.jpaperformance.jpaperformancedemo.domain.Person;
-import com.github.samallenswe.jpaperformance.jpaperformancedemo.domain.repository.PersonRepository;
-import com.github.samallenswe.jpaperformance.jpaperformancedemo.service.PersistenceService;
 import com.github.samallenswe.jpaperformance.jpaperformancedemo.utils.Utils;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

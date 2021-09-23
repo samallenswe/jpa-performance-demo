@@ -1,6 +1,10 @@
 package com.github.samallenswe.jpaperformance.jpaperformancedemo.model;
 
-import com.github.samallenswe.jpaperformance.jpaperformancedemo.service.PersistenceService;
+import static com.github.samallenswe.jpaperformance.jpaperformancedemo.utils.Utils.TEST_SIZE;
+
+import com.github.samallenswe.jpaperformance.jpaperformancedemo.domain.Person;
+import com.github.samallenswe.jpaperformance.jpaperformancedemo.domain.repository.PersonRepository;
+import com.github.samallenswe.jpaperformance.jpaperformancedemo.utils.Utils;
 import java.util.Scanner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
@@ -11,19 +15,32 @@ import org.springframework.stereotype.Component;
 @Component
 public class DirectToDb implements CommandLineRunner {
   @NonNull
-  private PersistenceService persistenceService;
+  private PersonRepository repository;
 
   @Override
   public void run(String... args) throws Exception {
-    //persistenceService.savePersons();
-    //persistenceService.deletePersons();
+    //savePersons();
+    //deletePersons();
   }
 
-  public DirectToDb(@NonNull final PersistenceService persistenceService) {
-    if (persistenceService == null) {
+  public void savePersons() {
+    for (int i = 1; i < TEST_SIZE; i++) {
+      Person person = Utils.createRandomPerson(i);
+      repository.save(person);
+    }
+  }
+
+  public void deletePersons() {
+    //Scanner scan = new Scanner(System.in);
+    //scan.nextLine();
+    repository.deleteAll();
+  }
+
+  public DirectToDb(@NonNull final PersonRepository repository) {
+    if (repository == null) {
       throw new NullPointerException("persistenceService is marked non-null but is null");
     } else {
-      this.persistenceService = persistenceService;
+      this.repository = repository;
     }
   }
 }

@@ -53,17 +53,23 @@ public class PersistenceService {
         }
     }
   }
-
-  public PersistenceService(@NonNull final PersonRepository repository, @NonNull final EntityManager entityManager) {
+  public PersistenceService(@NonNull final EntityManager entityManager) {
     if (entityManager == null) {
       throw new NullPointerException("entityManager is marked non-null but is null");
     } else {
       this.entityManager = entityManager;
     }
-    if (repository == null) {
-      throw new NullPointerException("repository is marked non-null but is null");
-    } else {
-      this.repository = repository;
-    }
   }
+//  public PersistenceService(@NonNull final PersonRepository repository, @NonNull final EntityManager entityManager) {
+//    if (entityManager == null) {
+//      throw new NullPointerException("entityManager is marked non-null but is null");
+//    } else {
+//      this.entityManager = entityManager;
+//    }
+//    if (repository == null) {
+//      throw new NullPointerException("repository is marked non-null but is null");
+//    } else {
+//      this.repository = repository;
+//    }
+//  }
 }
