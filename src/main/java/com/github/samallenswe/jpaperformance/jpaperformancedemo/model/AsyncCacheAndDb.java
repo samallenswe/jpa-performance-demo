@@ -6,27 +6,15 @@ import com.github.samallenswe.jpaperformance.jpaperformancedemo.domain.Person;
 import com.github.samallenswe.jpaperformance.jpaperformancedemo.domain.repository.PersonRepository;
 import com.github.samallenswe.jpaperformance.jpaperformancedemo.service.AsyncService;
 import com.github.samallenswe.jpaperformance.jpaperformancedemo.utils.Utils;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TransactionRequiredException;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.config.Task;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,61 +37,11 @@ public class AsyncCacheAndDb implements CommandLineRunner {
     entityManager.unwrap(Session.class).setJdbcBatchSize(10);
     entityManager.unwrap(Session.class).setHibernateFlushMode(FlushMode.MANUAL);
 
-    CompletableFuture<Void> asyncFlushFuture = asyncService.asyncFlush();
-    persistToCache();
-
-    CompletableFuture.allOf(asyncFlushFuture).join();
-
-//    asyncFlush();
-
-//    writeToCacheBatch();
-
-//    ExecutorService executorService = Executors.newFixedThreadPool(2);
+//    CompletableFuture<Void> asyncFlushFuture = asyncService.asyncFlush();
+//    persistToCacheNoFlush();
 //
-//    List<Callable<String>> callableTasks = new ArrayList<>();
-//    callableTasks.add(batchWriteToH2DB(executorService));
-//    callableTasks.add(asyncFlush());
-//
-//    try {
-//      List<Future<String>> futures = executorService.invokeAll(callableTasks);
-//      for (Future<String> future : futures) {
-//        try {
-//          if (future.isDone()) {
-//            System.out.println("future: call = " + future.get()); // This probably triggers the error. Because the process is not done before its called
-//          }
-//        } catch (CancellationException ce) {
-//          ce.printStackTrace();
-//        } catch (InterruptedException ie) {
-//          Thread.currentThread().interrupt(); // ignore/reset
-//        }
-//      }
-//    } catch (Exception err) {
-//      err.printStackTrace();
-//    }
-//
-//    awaitTerminationAfterShutdown(executorService);
+//    CompletableFuture.allOf(asyncFlushFuture).join();
   }
-
-//  @Transactional
-//  public void writeToCacheBatch() {
-//    for (int i = 1; i < TEST_SIZE; i++) {
-//      Person person = Utils.createRandomPerson(i);
-//      entityManager.persist(person);
-//    }
-//    entityManager.flush();
-//  }
-
-//  public void awaitTerminationAfterShutdown(ExecutorService threadPool) {
-//    threadPool.shutdown();
-//    try {
-//      if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
-//        threadPool.shutdownNow();
-//      }
-//    } catch (InterruptedException ex) {
-//      threadPool.shutdownNow();
-//      Thread.currentThread().interrupt();
-//    }
-//  }
 
 //  @Async
 //  @Transactional
@@ -128,8 +66,8 @@ public class AsyncCacheAndDb implements CommandLineRunner {
 //    log.info("Flushing all batches took: " + (endTime - startTime));
 //  }
 
-  public void persistToCache() {
-    Logger log = Logger.getLogger("################################## batchWriteToH2DB");
+  public void persistToCacheNoFlush() {
+    Logger log = Logger.getLogger("################################## persistToCacheNoFlush");
     long startTime = System.nanoTime();
     for (int i = 1; i < TEST_SIZE; i++) {
       System.out.println("############################### PERSIST THREAD ###############################");
@@ -140,42 +78,20 @@ public class AsyncCacheAndDb implements CommandLineRunner {
     log.info("Persisting all Entities took: " + (endTime - startTime));
   }
 
+  @Transactional
+  public void persistToCacheBatchFlush() {
+    Logger log = Logger.getLogger("################################## persistToCacheBatchFlush");
+    long startTime = System.nanoTime();
 
-//  @Async
-//  @Transactional
-//  public Callable asyncFlush() {
-//    Logger log = Logger.getLogger("################################## asyncFlush");
-//    long startTime = System.nanoTime();
-//
-//    for (int i = 0; i < 1; i++) {
-//        try {
-//          entityManager.flush();
-//          try {
-//            Thread.sleep(0,100000);
-//          } catch(InterruptedException ex) {
-//            Thread.currentThread().interrupt();
-//          }
-//        } catch (TransactionRequiredException ex) {
-//          // expected
-//        }
-//      }
-//    long endTime = System.nanoTime();
-//    log.info("Flushing all batches took: " + (endTime - startTime));
-//    return null;
-//  }
-//
-//  @Async
-//  public Callable batchWriteToH2DB(ExecutorService executorService) {
-//    Logger log = Logger.getLogger("################################## batchWriteToH2DB");
-//    long startTime = System.nanoTime();
-//    for (int i = 1; i < TEST_SIZE; i++) {
-//      Person person = Utils.createRandomPerson(i);
-//      entityManager.persist(person);
-//    }
-//    long endTime = System.nanoTime();
-//    log.info("Persisting all Entities took: " + (endTime - startTime));
-//    return null;
-//  }
+    for (int i = 1; i < TEST_SIZE; i++) {
+      Person person = Utils.createRandomPerson(i);
+      entityManager.persist(person);
+    }
+    entityManager.flush();
+
+    long endTime = System.nanoTime();
+    log.info("Persisting and batch flushing all Entities took: " + (endTime - startTime));
+  }
 
   public AsyncCacheAndDb(@NonNull final EntityManager entityManager, @NonNull final PersonRepository repository,
       @NonNull AsyncService asyncService) {

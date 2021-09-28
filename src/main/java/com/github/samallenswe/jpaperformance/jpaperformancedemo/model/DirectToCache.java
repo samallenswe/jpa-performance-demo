@@ -25,23 +25,25 @@ public class DirectToCache implements CommandLineRunner {
 
   @Override
   public void run(String... args) throws Exception {
-    Logger log = Logger.getLogger("DirectToCache");
     entityManager.unwrap(Session.class).setHibernateFlushMode(FlushMode.MANUAL);
-    long startTime = System.nanoTime();
-//    writeToCache();
-    long endTime = System.nanoTime();
-    log.info("Asynchronous Batch Write took: " + TimeUnit.NANOSECONDS.toMillis(endTime - startTime));
+    writeToCache();
   }
 
   public void writeToCache() {
+    Logger log = Logger.getLogger("################################## writeToCache");
+    long startTime = System.nanoTime();
     for (int i = 1; i < TEST_SIZE; i++) {
       Person person = Utils.createRandomPerson(i);
       entityManager.persist(person);
     }
+    long endTime = System.nanoTime();
+    log.info("Persisting all Entities took: " + TimeUnit.NANOSECONDS.toMillis(endTime - startTime));
   }
 
 //  @Transactional
 //  public void readFromH2DB() {
+//    Logger log = Logger.getLogger("################################## readFromH2DB");
+//    long startTime = System.nanoTime();
 //    for (int i = 1; i < TEST_SIZE; i++) {
 //      Person person = entityManager.find(Person.class, (long) i);
 //      if (person == null) {
@@ -50,6 +52,8 @@ public class DirectToCache implements CommandLineRunner {
 //        System.out.println(("Found person " + i + " with " + person.getEmail()));
 //      }
 //    }
+//    long endTime = System.nanoTime();
+//    log.info("Reading all Entities took: " + TimeUnit.NANOSECONDS.toMillis(endTime - startTime));
 //  }
 
   public DirectToCache(@NonNull final EntityManager entityManager) {

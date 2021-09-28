@@ -13,20 +13,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 public class JpaPerformanceDemoApplication {
 
-//	private static final Logger logger = LoggerFactory.getLogger(JpaPerformanceDemoApplication.class);
-//
-//	@Bean(name="processExecutor")
-//	public TaskExecutor workExecutor() {
-//		ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-//		threadPoolTaskExecutor.setThreadNamePrefix("Async-");
-//		threadPoolTaskExecutor.setCorePoolSize(3);
-//		threadPoolTaskExecutor.setMaxPoolSize(3);
-//		threadPoolTaskExecutor.setQueueCapacity(600);
-//		threadPoolTaskExecutor.afterPropertiesSet();
-//		logger.info("ThreadPoolTaskExecutor set");
-//		return threadPoolTaskExecutor;
-//	}
-
 	public static void main(String[] args) {
 		SpringApplication.run(JpaPerformanceDemoApplication.class, args);
 	}
