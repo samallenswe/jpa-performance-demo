@@ -19,8 +19,8 @@ public class DirectToDb implements CommandLineRunner {
 
   @Override
   public void run(String... args) throws Exception {
-    //savePersons();
-    //deletePersons();
+//    savePersons();
+//    deletePersons();
   }
 
   public void savePersons() {
@@ -31,8 +31,8 @@ public class DirectToDb implements CommandLineRunner {
   }
 
   public void deletePersons() {
-    //Scanner scan = new Scanner(System.in);
-    //scan.nextLine();
+//    Scanner scan = new Scanner(System.in);
+//    scan.nextLine();
     repository.deleteAll();
   }
 
