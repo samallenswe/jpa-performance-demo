@@ -6,6 +6,8 @@ import com.github.samallenswe.jpaperformance.jpaperformancedemo.domain.Person;
 import com.github.samallenswe.jpaperformance.jpaperformancedemo.domain.repository.PersonRepository;
 import com.github.samallenswe.jpaperformance.jpaperformancedemo.utils.Utils;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
@@ -24,10 +26,14 @@ public class DirectToDb implements CommandLineRunner {
   }
 
   public void savePersons() {
+    Logger log = Logger.getLogger("################################## DirectToDb");
+    long startTime = System.nanoTime();
     for (int i = 1; i < TEST_SIZE; i++) {
       Person person = Utils.createRandomPerson(i);
       repository.save(person);
     }
+    long endTime = System.nanoTime();
+    log.info("Saving all persons to DB took: " + TimeUnit.NANOSECONDS.toMillis(endTime - startTime));
   }
 
   public void deletePersons() {

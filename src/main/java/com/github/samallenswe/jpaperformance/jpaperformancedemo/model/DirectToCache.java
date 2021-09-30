@@ -26,7 +26,7 @@ public class DirectToCache implements CommandLineRunner {
   @Override
   public void run(String... args) throws Exception {
     entityManager.unwrap(Session.class).setHibernateFlushMode(FlushMode.MANUAL);
-    writeToCache();
+//    writeToCache();
   }
 
   public void writeToCache() {
@@ -38,23 +38,12 @@ public class DirectToCache implements CommandLineRunner {
     }
     long endTime = System.nanoTime();
     log.info("Persisting all Entities took: " + TimeUnit.NANOSECONDS.toMillis(endTime - startTime));
-  }
 
-//  @Transactional
-//  public void readFromH2DB() {
-//    Logger log = Logger.getLogger("################################## readFromH2DB");
-//    long startTime = System.nanoTime();
-//    for (int i = 1; i < TEST_SIZE; i++) {
-//      Person person = entityManager.find(Person.class, (long) i);
-//      if (person == null) {
-//        throw new NullPointerException("person entity is null");
-//      } else {
-//        System.out.println(("Found person " + i + " with " + person.getEmail()));
-//      }
-//    }
-//    long endTime = System.nanoTime();
-//    log.info("Reading all Entities took: " + TimeUnit.NANOSECONDS.toMillis(endTime - startTime));
-//  }
+    startTime = System.nanoTime();
+    entityManager.flush();
+    endTime = System.nanoTime();
+    log.info("Flushing all Entities took: " + TimeUnit.NANOSECONDS.toMillis(endTime - startTime));
+  }
 
   public DirectToCache(@NonNull final EntityManager entityManager) {
     if (entityManager == null) {

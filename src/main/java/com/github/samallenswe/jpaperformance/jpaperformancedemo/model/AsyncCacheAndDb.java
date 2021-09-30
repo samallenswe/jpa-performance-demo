@@ -6,12 +6,16 @@ import com.github.samallenswe.jpaperformance.jpaperformancedemo.domain.Person;
 import com.github.samallenswe.jpaperformance.jpaperformancedemo.domain.repository.PersonRepository;
 import com.github.samallenswe.jpaperformance.jpaperformancedemo.service.AsyncService;
 import com.github.samallenswe.jpaperformance.jpaperformancedemo.utils.Utils;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import org.apache.catalina.mbeans.UserMBean;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
@@ -22,11 +26,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Component
 public class AsyncCacheAndDb implements CommandLineRunner {
-  @PersistenceContext
+  @PersistenceContext(type = PersistenceContextType.EXTENDED)
   @NonNull
   private EntityManager entityManager;
 
   @NonNull
+  @Autowired
   private PersonRepository repository;
 
   @NonNull
@@ -36,61 +41,46 @@ public class AsyncCacheAndDb implements CommandLineRunner {
   public void run(String... args) throws Exception {
     entityManager.unwrap(Session.class).setJdbcBatchSize(10);
     entityManager.unwrap(Session.class).setHibernateFlushMode(FlushMode.MANUAL);
-
-//    CompletableFuture<Void> asyncFlushFuture = asyncService.asyncFlush();
-//    persistToCacheNoFlush();
-//
-//    CompletableFuture.allOf(asyncFlushFuture).join();
+//    persistToCacheBatchFlush();
+    Semaphore semaphore = new Semaphore(1);
+    asyncService.asyncFlush(entityManager,semaphore);
+    persistToCacheNoFlush(semaphore);
   }
 
-//  @Async
-//  @Transactional
-//  public void asyncFlush() {
-//    Logger log = Logger.getLogger("################################## asyncFlush");
-//    long startTime = System.nanoTime();
-//
-//    for (int i = 0; i < 5; i++) {
-//        System.out.println("############################### ASYNC THREAD ###############################");
-//        try {
-//          entityManager.flush();
-//          try {
-//            Thread.sleep(0,100000);
-//          } catch(InterruptedException ex) {
-//            Thread.currentThread().interrupt();
-//          }
-//        } catch (TransactionRequiredException ex) {
-//          // expected
-//        }
-//      }
-//    long endTime = System.nanoTime();
-//    log.info("Flushing all batches took: " + (endTime - startTime));
-//  }
-
-  public void persistToCacheNoFlush() {
+  public void persistToCacheNoFlush(Semaphore semaphore) {
     Logger log = Logger.getLogger("################################## persistToCacheNoFlush");
     long startTime = System.nanoTime();
     for (int i = 1; i < TEST_SIZE; i++) {
       System.out.println("############################### PERSIST THREAD ###############################");
       Person person = Utils.createRandomPerson(i);
-      entityManager.persist(person);
+
+      try {
+        semaphore.acquire();
+        try {
+          entityManager.persist(person);
+        } finally {
+          semaphore.release();
+        }
+      } catch(final InterruptedException ie) {
+        // handle acquire failure here
+      }
+
     }
     long endTime = System.nanoTime();
-    log.info("Persisting all Entities took: " + (endTime - startTime));
+    log.info("Persisting all Entities took: " + TimeUnit.NANOSECONDS.toMillis(endTime - startTime));
   }
 
   @Transactional
   public void persistToCacheBatchFlush() {
     Logger log = Logger.getLogger("################################## persistToCacheBatchFlush");
     long startTime = System.nanoTime();
-
     for (int i = 1; i < TEST_SIZE; i++) {
       Person person = Utils.createRandomPerson(i);
       entityManager.persist(person);
     }
     entityManager.flush();
-
     long endTime = System.nanoTime();
-    log.info("Persisting and batch flushing all Entities took: " + (endTime - startTime));
+    log.info("Persisting and batch flushing all Entities took: " + TimeUnit.NANOSECONDS.toMillis(endTime - startTime));
   }
 
   public AsyncCacheAndDb(@NonNull final EntityManager entityManager, @NonNull final PersonRepository repository,
