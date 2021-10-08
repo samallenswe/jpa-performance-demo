@@ -21,14 +21,14 @@ public class DirectToDb implements CommandLineRunner {
 
   @Override
   public void run(String... args) throws Exception {
-//    savePersons();
-//    deletePersons();
+    savePersons();
+    deletePersons();
   }
 
   public void savePersons() {
     Logger log = Logger.getLogger("################################## DirectToDb");
     long startTime = System.nanoTime();
-    for (int i = 1; i < TEST_SIZE; i++) {
+    for (int i = 1; i < TEST_SIZE*10; i++) {
       Person person = Utils.createRandomPerson(i);
       repository.save(person);
     }
@@ -37,8 +37,8 @@ public class DirectToDb implements CommandLineRunner {
   }
 
   public void deletePersons() {
-//    Scanner scan = new Scanner(System.in);
-//    scan.nextLine();
+    Scanner scan = new Scanner(System.in);
+    scan.nextLine();
     repository.deleteAll();
   }
 

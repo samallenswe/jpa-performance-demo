@@ -3,15 +3,11 @@ package com.github.samallenswe.jpaperformance.jpaperformancedemo.service;
 import com.github.samallenswe.jpaperformance.jpaperformancedemo.domain.repository.PersonRepository;
 import com.github.samallenswe.jpaperformance.jpaperformancedemo.model.AsyncCacheAndDb;
 import java.util.concurrent.Semaphore;
-import java.util.logging.Logger;
-import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AsyncService {
@@ -29,7 +25,7 @@ public class AsyncService {
       try {
         semaphore.acquire();
         try {
-          System.out.println("############################### ASYNC THREAD ###############################");
+//          System.out.println("############################### ASYNC THREAD ###############################");
           runner.flushHelper();
         } finally {
           semaphore.release();
@@ -38,7 +34,7 @@ public class AsyncService {
         System.out.println(ie.toString());
       }
       try {
-        Thread.sleep(50,0);
+        Thread.sleep(120000,0);
       } catch(InterruptedException ex) {
         Thread.currentThread().interrupt();
       }
